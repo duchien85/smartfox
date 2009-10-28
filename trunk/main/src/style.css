@@ -1,0 +1,31 @@
+/* CSS file */
+.title
+{
+	color: #333333;
+	font-size: 11;
+	font-weight: bold;
+}
+
+.backButton
+{
+   upSkin: Embed(source="skin.swf", symbol="ArrowLeftNormal");
+   overSkin: Embed(source="skin.swf", symbol="ArrowLeftOver");
+   downSkin: Embed(source="skin.swf", symbol="ArrowLeftDown");
+   disabledSkin: Embed(source="skin.swf", symbol="ArrowLeftDisabled");
+}
+
+.forwardButton
+{
+   upSkin: Embed(source="skin.swf", symbol="ArrowRightNormal");
+   overSkin: Embed(source="skin.swf", symbol="ArrowRightOver");
+   downSkin: Embed(source="skin.swf", symbol="ArrowRightDown");
+   disabledSkin: Embed(source="skin.swf", symbol="ArrowRightDisabled");
+}
+
+.refreshButton
+{
+   upSkin: Embed(source="skin.swf", symbol="RefreshNormal");
+   overSkin: Embed(source="skin.swf", symbol="RefreshOver");
+   downSkin: Embed(source="skin.swf", symbol="RefreshDown");
+   disabledSkin: Embed(source="skin.swf", symbol="RefreshDisabled");
+}

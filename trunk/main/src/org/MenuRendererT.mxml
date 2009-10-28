@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%"
+	height="100%"
+	minWidth="70"
+	maxWidth="190"
+	implements="mx.controls.listClasses.IListItemRenderer, mx.controls.menuClasses.IMenuItemRenderer"
+	horizontalScrollPolicy="off"
+	verticalScrollPolicy="off">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Menu;
+			import org.adm.graphics.ico.Icon;
+			private var _icon:org.adm.graphics.ico.Icon;
+
+			private var _data:Object;
+			[Bindable]
+			private var _label:String;
+
+			override public function set data(val:Object):void
+			{
+
+				if (this._icon != null && this.contains(this._icon as DisplayObject))
+					this.removeChild(this._icon as DisplayObject);
+				this._icon = val.icon;
+				this.addChild(this._icon as DisplayObject);
+
+				this._label = val.label;
+				this._data = val;
+				this.invalidateDisplayList();
+			}
+
+			override public function get data():Object
+			{
+				return this._data;
+			}
+
+			public function get menu():Menu
+			{
+				return null;
+			}
+
+			public function set menu(value:Menu):void
+			{
+
+			}
+
+			public function get measuredIconWidth():Number
+			{
+				return _icon.measuredWidth;
+			}
+
+			/**
+			 *  The width of the type icon (radio/check).
+			 */
+			public function get measuredTypeIconWidth():Number
+			{
+				return _icon.measuredWidth;
+			}
+
+			/**
+			 *  The width of the branch icon.
+			 */
+			public function get measuredBranchIconWidth():Number
+			{
+				return _icon.measuredWidth;
+			}
+		]]>
+	</mx:Script>
+
+	<mx:Label text="{this._label}"
+		id="tf"
+		height="100%"
+		left="20"
+		right="10"
+		/>
+</mx:Canvas>

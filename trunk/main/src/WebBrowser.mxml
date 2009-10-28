@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml"
+	layout="vertical"
+	paddingTop="0"
+	paddingLeft="10"
+	paddingRight="10"
+	paddingBottom="10"
+	width="1000"
+	height="700"
+	minWidth="400"
+	minHeight="500"
+	applicationComplete="init()"
+	close="closeApp()"
+	titleTextStyleName="title"
+	closeEffect="fadeOut"
+	creationCompleteEffect="Iris"
+	resizeEffect="Blur"
+	keyDown="onKeyDown(event)"
+	xmlns:hosts="hosts.*"
+	xmlns:code="flexlib.containers.*"
+	xmlns:local="*"
+	xmlns:adm="http://www.adm.org">
+
+	<mx:Style source="style.css"/>
+	<mx:Fade alphaFrom="1"
+		alphaTo="0"
+		id="fadeOut"
+		duration="500"/>
+
+	<mx:Script>
+		<![CDATA[
+			import org.OverlayScreen;
+			import org.VersionUpdater;
+			import mx.core.IFlexDisplayObject;
+			import org.AboutWindow;
+			import mx.managers.PopUpManager;
+			import mx.events.MenuEvent;
+			import mx.core.Container;
+			import hosts.HTMLTab;
+			import mx.containers.Canvas;
+			import flexlib.containers.SuperTabNavigator;
+			import flexlib.controls.SuperTabBar;
+			import flexlib.controls.tabBarClasses.SuperTab;
+			import hosts.CustomHost;
+			import mx.collections.ArrayCollection;
+			import mx.effects.easing.Back;
+
+			import mx.core.mx_internal;
+			use namespace mx_internal;
+
+
+			[Bindable]
+			public var typedinaddresses:Array = new Array;
+			[Bindable]
+			public var pos:Number;
+			public var htmlHost:CustomHost;
+			private var vu : VersionUpdater;
+			private var popUp : IFlexDisplayObject;
+
+			[Bindable]
+			public var htmlRenderer:HTMLTab;
+
+			//Application initialization
+			public function init():void
+			{
+				vu = new VersionUpdater();
+				popUp = PopUpManager.createPopUp(this, OverlayScreen, false);
+				PopUpManager.centerPopUp(popUp);
+				var timer : Timer = new Timer(2000, 1);
+				timer.addEventListener(TimerEvent.TIMER, onTimer);
+				timer.start();
+				
+				title = "  SmartFox";
+
+				//read history
+				var file:File = File.applicationStorageDirectory;
+				file = file.resolvePath("hist.ffx");
+				address.text = "";
+				address.selectedIndex = -1;
+
+				if ((file.exists) && (!file.isDirectory))
+				{
+					var fs:FileStream = new FileStream();
+					fs.open(file, FileMode.READ);
+					typedinaddresses = fs.readObject()as Array;
+					fs.close();
+				}
+				address.selectedIndex = -1;
+				address.text = "";
+
+				stage.focus = address;
+
+				var tab:HTMLTab = new HTMLTab();
+				stn.addChild(tab);
+				this.selectedTab = tab;
+			//var tabBar:SuperTabBar = this.stn.mx_internal::getTabBar() as SuperTabBar;
+			}
+			
+			private function onTimer(ev : TimerEvent):void
+			{
+				(ev.target as Timer).stop();
+				PopUpManager.removePopUp(popUp);
+				popUp = null;
+			}
+
+			private function onKeyDown(event:KeyboardEvent):void
+			{
+
+				if ((event.controlKey || event.commandKey )&& event.keyCode == 84)
+				{
+					event.stopImmediatePropagation();
+					event.preventDefault();
+					onAddTab(null);
+				}
+			}
+
+			private function onAddTab(event:MouseEvent):void
+			{
+				this.addTab();
+			}
+
+			//Clicking go
+			public function clickGo():void
+			{
+				if (!address.value) return;
+				if (address.value.toString() == "")
+					return ;
+				var add:String = address.value.toString();
+
+				if (add.indexOf("://") < 0)
+				{
+					add = "http://" + add;
+				}
+				htmlRenderer.renderer.location = add;
+
+				if ((typedinaddresses.indexOf(add) < 0) && (typedinaddresses.indexOf(add + "/") < 0))
+				{
+					typedinaddresses = typedinaddresses.reverse();
+					typedinaddresses.push(add);
+
+					while(typedinaddresses.length > 50)
+					{
+						typedinaddresses.shift();
+					}
+					typedinaddresses = typedinaddresses.reverse();
+				}
+			}
+
+			//Updating the current page after a selection from the page
+			public function closeList():void
+			{
+				clickGo();
+				stage.focus = htmlRenderer.renderer.htmlLoader;
+			}
+
+			public function goBack():void
+			{
+				htmlRenderer.renderer.historyBack()
+			}
+
+			public function goFwd():void
+			{
+				htmlRenderer.renderer.historyForward();
+			}
+
+			//Save combobox data on the disk before closing
+			public function closeApp():void
+			{
+				var fs:FileStream = new FileStream();
+				var file:File = File.applicationStorageDirectory;
+				file = file.resolvePath("hist.ffx");
+				fs.open(file, FileMode.WRITE);
+				fs.writeObject(typedinaddresses);
+				fs.close();
+			}
+
+			public function clickRefresh():void
+			{
+				htmlRenderer.renderer.reload();
+			}
+
+			public function doneLoading():void
+			{
+				status = "Done";
+			}
+
+			//Changing the location
+			public function set locationChange(val:String):void
+			{
+				address.text = htmlRenderer.renderer.location;
+			}
+
+			public function addTab(addClosePolicy:Boolean = true):void
+			{
+
+				var htmlTab:HTMLTab = new HTMLTab();
+				htmlTab.title = "Bla bla";
+				this.stn.addChild(htmlTab);
+
+				if (addClosePolicy)
+				{
+
+					if (this.stn.numChildren >= 2)
+						this.stn.closePolicy = SuperTab.CLOSE_ALWAYS;
+				}
+				this.stn.selectedChild = htmlTab;
+			}
+
+			private function onTabClose():void
+			{
+
+				if (this.stn.numChildren <= 2)
+				{
+					this.stn.closePolicy = SuperTab.CLOSE_NEVER;
+
+					if (this.stn.numChildren < 2)
+					{
+						this.addTab(false);
+					}
+				}
+
+			}
+
+			private function set selectedTab(tab:Container):void
+			{
+				this.htmlRenderer = tab as HTMLTab;
+			}
+
+			public function menuProcessor(event:MenuEvent):void
+			{
+				if (event.item.@data == "new_tab")
+				{
+					this.addTab();
+				} 
+				else if (event.item.@data == "exit")
+				{
+					this.close();
+				}
+				else if (event.item.@data == "check_for_updates")
+				{
+					this.vu.checkForUpdate();
+				}
+				else if (event.item.@data == "about")
+				{
+					var pop : IFlexDisplayObject = PopUpManager.createPopUp(this, AboutWindow, false);
+					PopUpManager.centerPopUp(pop);
+				}
+			}
+		]]>
+	</mx:Script>
+
+	<mx:MenuBar width="100%"
+		labelField="@label"
+		id="MyMenuBar"
+		itemClick="menuProcessor(event)">
+		<mx:XMLList>
+			<menuitem label="File">
+				<menuitem label="New Tab" data="new_tab" />
+				<menuitem label="Exit" data="exit" />
+			</menuitem>
+			<menuitem label="Help">
+				<menuitem label="Check for Updates" data="check_for_updates"/>
+				<menuitem label="About" data="about"/>
+			</menuitem>
+		</mx:XMLList>
+	</mx:MenuBar>
+
+	<mx:ApplicationControlBar width="100%">
+		<mx:Button id="back"
+			click="{goBack();}"
+			enabled="{htmlRenderer.backEnabled}"
+			styleName="backButton"/>
+		<mx:Button id="forward"
+			click="{goFwd();}"
+			enabled="{htmlRenderer.forwardEnabled}"
+			styleName="forwardButton"/>
+		<mx:Button id="refresh"
+			click="{clickRefresh();}"
+			enabled="{htmlRenderer.refreshEnabled}"
+			styleName="refreshButton"/>
+		<mx:ComboBox id="address"
+			width="100%"
+			editable="true"
+			dataProvider="{typedinaddresses}"
+			enter="{clickGo();}"
+			close="{closeList();}"
+			minWidth="200"/>
+		<mx:Button id="go"
+			label="Go"
+			click="{clickGo()}"/>
+	</mx:ApplicationControlBar>
+
+	<code:SuperTabNavigator id="stn"
+		scrollSpeed="25"
+		dropShadowEnabled="true"
+		stopScrollingEvent="{MouseEvent.MOUSE_OUT}"
+		startScrollingEvent="{MouseEvent.MOUSE_OVER}"
+		width="100%"
+		height="100%"
+		horizontalGap="0"
+		tabClose="onTabClose()"
+		closePolicy="{SuperTab.CLOSE_NEVER}"
+		showPlusButton="true"
+		addNewTabOnDoubleClick="true"
+		popUpButtonPolicy="{SuperTabNavigator.POPUPPOLICY_AUTO}"
+		addNewTabEvent="addTab()"
+		allowTabSqueezing="false"
+		tabWidth="180"
+		creationPolicy="all">
+	</code:SuperTabNavigator>
+
+	<mx:Binding source="htmlRenderer.renderer.location"
+		destination="this.locationChange"/>
+	<mx:Binding source="htmlRenderer.status"
+		destination="this.status"/>
+	<mx:Binding source="stn.selectedChild"
+		destination="this.selectedTab"/>
+</mx:WindowedApplication>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%" 
+	height="100%"
+	initialize="init()"
+	creationComplete="creationComplete()">
+	
+	<mx:Script>
+		<![CDATA[
+			import flexlib.containers.SuperTabNavigator;
+			import mx.containers.TabNavigator;
+			import flexlib.controls.tabBarClasses.SuperTab;
+			import flexlib.events.SuperTabEvent;
+			[Bindable]
+			public var status : String;
+			[Bindable]
+			public var address : String;
+			[Bindable]
+			public var refreshEnabled : Boolean;
+			[Bindable]
+			public var backEnabled : Boolean;
+			[Bindable]
+			public var forwardEnabled : Boolean;
+			public var favicon : String;
+			public var tab : SuperTab;
+			
+			public static const FAV_ICON_CHANGE : String = "favIconChange";
+			
+			private var _title : String;
+			
+			private var _host : HTMLHost;
+			
+			private function init():void
+			{
+				this.title = "New tab";
+			}
+			
+			private function creationComplete():void
+			{
+	    		this.renderer.htmlLoader.textEncodingFallback = "UTF-8";
+				this._host = new CustomHost(this);
+				this.renderer.addEventListener(Event.LOCATION_CHANGE, locChange)
+				this.renderer.htmlLoader.htmlHost = this._host;
+			}
+			
+			public function doneLoading():void
+			{
+				status = "Done";
+			}
+			
+			public function refresh():void
+			{
+				this.renderer.reload();
+			}
+			
+			public function locChange(ev : Event):void
+			{
+				this.refreshEnabled = true;
+				if ((this.renderer.historyPosition > 0) || (this.renderer.historyLength == 1))
+				{
+					this.backEnabled = true;
+				}
+				else
+				{
+					this.backEnabled = false;
+				}
+				
+				
+				if (this.renderer.historyPosition < this.renderer.historyLength -1)
+				{
+					this.forwardEnabled = true;
+				}
+				else
+				{
+					this.forwardEnabled = false;
+				}
+				
+				this.status = "Loading ...";
+				var slashIndex : int = this.renderer.location.indexOf("/", 9);
+				slashIndex = slashIndex > 0 ? slashIndex : this.renderer.location.length;
+				favicon = this.renderer.location.substr(0, slashIndex);
+				favicon+= "/favicon.ico"
+				if (this.parent)
+				tab = (this.parent as SuperTabNavigator).getTabAt(this.parent.getChildIndex(this)) as SuperTab;
+				if (tab) tab.indicator.source = favicon;
+			}
+			
+			[Bindable]
+			public function set title(val : String):void
+			{
+				this.label = "    " + val;
+				this._title = val;
+			}
+			
+			public function get title():String
+			{
+				return this._title;
+			}
+			
+			
+		]]>
+	</mx:Script>
+	<mx:HTML id="renderer" complete="doneLoading();">
+		
+	</mx:HTML>
+</mx:Canvas>

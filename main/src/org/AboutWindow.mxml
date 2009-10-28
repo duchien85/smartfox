@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+	layout="vertical"
+	paddingTop="20"
+	paddingBottom="20"
+	paddingLeft="20"
+	paddingRight="10"
+	showCloseButton="true"
+	title="About{nameAndVersion}"
+	close="onClose()"
+	initialize="setApplicationNameAndVersion()"
+	width="500"
+	height="400">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var nameAndVersion : String ="";
+			
+			private function onClose():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			/**
+			 * Displays the current application version in the UI. 
+			 */
+			private function setApplicationNameAndVersion():void 
+			{
+				var appXML:XML = NativeApplication.nativeApplication.applicationDescriptor;
+				var ns:Namespace = appXML.namespace();
+				//lblAppVersion.text = 
+				nameAndVersion = " " +  appXML.ns::name;
+				nameAndVersion += " (" + appXML.ns::version + ")";
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea width="100%" height="100%" paddingRight="30" selectable="true" editable="false" borderStyle="none" >
+		<mx:htmlText>
+			<![CDATA[
+		SmartFox is an open source Flex AIR web browser. It is intended to be a demo on how to use the HTML component and the linked classes from the AIR framework, but it's also usefull as a light-weight web browser (as it uses a striped down version of WebKit). <br /><br />
+		The key features are:</br/>
+				<ul>
+					<li>History management (back/forward)</li>
+					<li>Typed in addresses are saved</li>
+					<li>Tabed browsing (v1.2)</li>
+					<li>Auto updates (v1.2)</li>
+					<li>Favicon icons (v1.2)</li>
+				</ul> 
+		Tabs are easy to use and behave a lot like Mozilla Firefox. You can open a new tab from the File menu, using Ctrl(or Command for Mac)+T, by double clicking the empty tabs area or by clicking on the + button. To close the tab, you must click on the close button or middle-click on the tab. Swaping through tabs can be done by clicking on them or by using the tabs list to the right.
+		
+		Many thanks to <a href="http://blog.another-d-mention.ro"/>Iacob Nasca</a> for the IconLoader classes and to the <a href="http://code.google.com/p/flexlib/"/>FlexLib</a> contributors for the SuperTabNavigator components.
+			]]>
+		</mx:htmlText>
+	</mx:TextArea>
+
+</mx:TitleWindow>

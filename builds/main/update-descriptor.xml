@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<update xmlns="http://ns.adobe.com/air/framework/update/description/1.0">
+  <version>1.2.1</version>
+  <url>http://localhost:805/flash/WebBrowser.air</url>
+  <description><![CDATA[
+Version 1.2. The new features are:
+	* Tabed browsing
+	* Auto updates
+	* Favicon icons
+  ]]></description>
+</update>
